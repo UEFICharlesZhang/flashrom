@@ -900,18 +900,33 @@ int read_buf_from_file(unsigned char *buf, unsigned long size,
 		ret = 1;
 		goto out;
 	}
-	if ((image_stat.st_size != (intmax_t)size) && strcmp(filename, "-")) {
+	if ((image_stat.st_size > (intmax_t)size) && strcmp(filename, "-")) {
 		msg_gerr("Error: Image size (%jd B) doesn't match the expected size (%lu B)!\n",
 			 (intmax_t)image_stat.st_size, size);
 		ret = 1;
 		goto out;
 	}
+	else
+	{
+		unsigned char *temp;
+		uint i;
+		temp = malloc((intmax_t)size);
 
-	unsigned long numbytes = fread(buf, 1, size, image);
-	if (numbytes != size) {
-		msg_gerr("Error: Failed to read complete file. Got %ld bytes, "
-			 "wanted %ld!\n", numbytes, size);
-		ret = 1;
+		for (i = 0; i < (intmax_t)size; i++)
+		{
+			temp[i] = 0xFF;
+		}
+
+		unsigned long numbytes = fread(temp, 1, (unsigned long )image_stat.st_size, image);
+		if (numbytes != (unsigned long )image_stat.st_size)
+		{
+			msg_gerr("Error: Failed to read complete file. Got %ld bytes, "
+					 "wanted %ld!\n",
+					 numbytes, image_stat.st_size);
+			ret = 1;
+			goto out;
+		}
+		memcpy(buf,temp,size);
 	}
 out:
 	(void)fclose(image);
