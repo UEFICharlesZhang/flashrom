@@ -171,6 +171,9 @@ static int probe_spi_rdid_generic(struct flashctx *flash, int bytes)
 	}
 
 	rdid_get_ids(id_cache[idty].bytes, bytes, &id1, &id2);
+
+	msg_gerr("CHZ id: 0x%04x-0x%04x\n", id1,id2);
+
 	return compare_id(flash, id1, id2);
 }
 
